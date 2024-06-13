@@ -73,5 +73,7 @@ python test.py
 
 ### 相关截图
 - labelImg标注界面
+![image](https://github.com/Samge0/yolo8-watermark-xhs/assets/17336101/1e1c64f6-5049-4e43-aeb7-5cfedd305bee)
 
 - 训练后的模型预测结果
+![image](https://github.com/Samge0/yolo8-watermark-xhs/assets/17336101/6eaf4f70-f1a9-4605-8f9a-7ecf7abba921)
