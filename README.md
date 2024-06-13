@@ -77,3 +77,8 @@ python test.py
 
 - 训练后的模型预测结果
 ![image](https://github.com/Samge0/yolo8-watermark-xhs/assets/17336101/6eaf4f70-f1a9-4605-8f9a-7ecf7abba921)
+
+|img1|img2|
+|:--------:|:--------:|
+|![test](https://github.com/Samge0/yolo8-watermark-xhs/assets/17336101/04fdd1d9-6055-4774-a973-e11882a75b15)|![tmp9zby3ksb](https://github.com/Samge0/yolo8-watermark-xhs/assets/17336101/db2d1deb-00e8-4c89-bdc9-72fdfb1fb658)|
+|![tmp2046ojfe](https://github.com/Samge0/yolo8-watermark-xhs/assets/17336101/8a33950c-5ee3-49f5-91f5-38a3c2e7b32c)|![tmpyv0z5qty](https://github.com/Samge0/yolo8-watermark-xhs/assets/17336101/288efd14-7cc2-4a2d-86a5-a825d8e9a02d)|
