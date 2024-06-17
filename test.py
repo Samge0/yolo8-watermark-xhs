@@ -43,7 +43,7 @@ def _print_date_info(tag: str, start_date):
 if __name__ == "__main__":
     # Load model
     start_date = time.time()
-    model_path = "runs/detect/train2/weights/best.pt"    # customize the trained model, you need to execute `python training py` to get it first
+    model_path = "runs/detect/train/weights/best.pt"    # customize the trained model, you need to execute `python training py` to get it first
     # model_path = "result-weights/best.pt"     # with the demo model submitted by this branch, it can be run directly
     print(f"Load model: {model_path}")
     model = YOLO(model_path)
