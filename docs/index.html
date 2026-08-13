@@ -1,0 +1,606 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>小红书 Logo 水印检测 Demo</title>
+    <link rel="icon" type="image/png" href="icon.png">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Manrope:wght@500;600;700&family=Noto+Sans+SC:wght@400;500;600;700&family=Noto+Serif+SC:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            400: '#e07358',
+                            500: '#d85241',
+                            600: '#c94532',
+                            700: '#b03827',
+                        },
+                        neutral: {
+                            50: '#f9f9f8',
+                            100: '#f3f3f0',
+                            200: '#e8e8e4',
+                            300: '#d4d4ce',
+                            800: '#4a4a42',
+                            900: '#2d2d26',
+                        },
+                        accent: {
+                            500: '#fbbf24',
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'Noto Sans SC', 'system-ui', 'sans-serif'],
+                        serif: ['Noto Serif SC', 'Georgia', 'serif'],
+                        display: ['Manrope', 'Noto Sans SC', 'sans-serif'],
+                    },
+                    boxShadow: {
+                        'soft': '0 2px 15px rgba(216, 82, 65, 0.08)',
+                        'medium': '0 4px 25px rgba(216, 82, 65, 0.12)',
+                        'glass': '0 8px 32px rgba(216, 82, 65, 0.1)',
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            background: linear-gradient(135deg, #faf9f7 0%, #f7f5f2 100%);
+        }
+        .glass-effect {
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(216, 82, 65, 0.08);
+        }
+        .gradient-text {
+            background: linear-gradient(135deg, #d85241 0%, #e07358 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .card-hover {
+            transition: all 0.3s ease;
+        }
+        .card-hover:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 40px rgba(216, 82, 65, 0.15);
+        }
+        .code-block {
+            background: #f7f5f2;
+            border: 1px solid #e8e8e4;
+            border-radius: 8px;
+        }
+        .details-animation {
+            transition: all 0.3s ease;
+        }
+        details[open] .details-animation {
+            max-height: 1000px;
+            opacity: 1;
+        }
+        details:not([open]) .details-animation {
+            max-height: 0;
+            opacity: 0;
+            overflow: hidden;
+        }
+    </style>
+</head>
+<body class="min-h-screen">
+    <!-- Navigation -->
+    <nav class="fixed top-0 left-0 right-0 z-50 glass-effect border-b border-neutral-200">
+        <div class="max-w-6xl mx-auto px-6 py-4">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-3">
+                    <img src="icon.png" alt="Watermark Detection" class="w-9 h-9">
+                    <span class="font-display font-semibold text-neutral-900 text-lg">水印检测</span>
+                </div>
+                <div class="hidden md:flex items-center space-x-8">
+                    <a href="#features" class="text-neutral-700 hover:text-brand-500 transition-colors font-medium">特性</a>
+                    <a href="#how-it-works" class="text-neutral-700 hover:text-brand-500 transition-colors font-medium">工作流程</a>
+                    <a href="#environment" class="text-neutral-700 hover:text-brand-500 transition-colors font-medium">环境配置</a>
+                    <a href="#training" class="text-neutral-700 hover:text-brand-500 transition-colors font-medium">训练推理</a>
+                    <a href="#faq" class="text-neutral-700 hover:text-brand-500 transition-colors font-medium">FAQ</a>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <a href="https://github.com/Samge0/yolo8-watermark-xhs" target="_blank" class="text-neutral-700 hover:text-brand-500 transition-colors">
+                        <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
+                        </svg>
+                    </a>
+                    <a href="https://github.com/Samge0/yolo8-watermark-xhs" target="_blank" class="bg-gradient-to-r from-brand-500 to-brand-600 text-white px-5 py-2.5 rounded-lg font-medium hover:shadow-soft transition-all">
+                        开始使用
+                    </a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="pt-32 pb-20 px-6">
+        <div class="max-w-6xl mx-auto">
+            <div class="text-center max-w-4xl mx-auto">
+                <div class="inline-block mb-6 px-4 py-2 rounded-full glass-effect border border-brand-200">
+                    <span class="text-white font-medium text-sm">🎯 YOLOv8 + LabelImg 智能水印检测</span>
+                </div>
+                <h1 class="font-display font-bold text-5xl md:text-6xl text-neutral-900 mb-6 leading-tight">
+                    小红书 Logo 水印<span class="gradient-text">检测 Demo</span>
+                </h1>
+                <p class="text-xl text-neutral-700 mb-10 leading-relaxed max-w-2xl mx-auto">
+                    使用 LabelImg 对 24 张样本图片进行水印位置标注，ultralytics-YOLO8 对水印位置进行模型训练与检测
+                </p>
+                <div class="flex flex-col sm:flex-row items-center justify-center gap-4">
+                    <a href="https://github.com/Samge0/yolo8-watermark-xhs" target="_blank" class="w-full sm:w-auto bg-gradient-to-r from-brand-500 to-brand-600 text-white px-8 py-4 rounded-lg font-semibold hover:shadow-medium transition-all flex items-center justify-center space-x-2">
+                        <span>查看 GitHub 项目</span>
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"/>
+                        </svg>
+                    </a>
+                    <a href="https://github.com/Samge0/yolo8-plus-iopaint" target="_blank" class="w-full sm:w-auto glass-effect text-neutral-800 px-8 py-4 rounded-lg font-semibold hover:shadow-soft transition-all flex items-center justify-center space-x-2 border border-brand-200">
+                        <span>YOLO8 + IOPaint 自动移除</span>
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/>
+                        </svg>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section id="features" class="py-20 px-6">
+        <div class="max-w-6xl mx-auto">
+            <div class="text-center mb-16">
+                <h2 class="font-display font-bold text-3xl md:text-4xl text-neutral-900 mb-4">核心特性</h2>
+                <p class="text-neutral-600 text-lg max-w-2xl mx-auto">基于 YOLOv8 的智能水印检测方案，支持自定义数据集训练</p>
+            </div>
+            
+            <div class="grid md:grid-cols-3 gap-8">
+                <!-- Feature 1 -->
+                <div class="glass-effect rounded-2xl p-8 card-hover border border-neutral-200">
+                    <div class="w-14 h-14 rounded-xl bg-gradient-to-br from-brand-500 to-brand-600 flex items-center justify-center mb-6">
+                        <svg class="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+                        </svg>
+                    </div>
+                    <h3 class="font-display font-semibold text-xl text-neutral-900 mb-3">精确检测</h3>
+                    <p class="text-neutral-600 leading-relaxed">基于 YOLOv8 深度学习模型，对小红书 Logo 水印进行高精度定位识别</p>
+                </div>
+
+                <!-- Feature 2 -->
+                <div class="glass-effect rounded-2xl p-8 card-hover border border-neutral-200">
+                    <div class="w-14 h-14 rounded-xl bg-gradient-to-br from-brand-500 to-brand-600 flex items-center justify-center mb-6">
+                        <svg class="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                        </svg>
+                    </div>
+                    <h3 class="font-display font-semibold text-xl text-neutral-900 mb-3">简单标注</h3>
+                    <p class="text-neutral-600 leading-relaxed">使用 LabelImg 进行可视化标注，支持 YOLO 格式导出，快速构建训练数据集</p>
+                </div>
+
+                <!-- Feature 3 -->
+                <div class="glass-effect rounded-2xl p-8 card-hover border border-neutral-200">
+                    <div class="w-14 h-14 rounded-xl bg-gradient-to-br from-brand-500 to-brand-600 flex items-center justify-center mb-6">
+                        <svg class="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4"/>
+                        </svg>
+                    </div>
+                    <h3 class="font-display font-semibold text-xl text-neutral-900 mb-3">自定义训练</h3>
+                    <p class="text-neutral-600 leading-relaxed">支持自定义数据集进行训练，灵活配置模型参数，满足不同场景需求</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- How it Works -->
+    <section id="how-it-works" class="py-20 px-6 bg-white/50">
+        <div class="max-w-6xl mx-auto">
+            <div class="text-center mb-16">
+                <h2 class="font-display font-bold text-3xl md:text-4xl text-neutral-900 mb-4">工作流程</h2>
+                <p class="text-neutral-600 text-lg max-w-2xl mx-auto">从数据标注到模型部署的完整流程</p>
+            </div>
+
+            <div class="grid md:grid-cols-4 gap-6">
+                <!-- Step 1 -->
+                <div class="text-center">
+                    <div class="w-16 h-16 rounded-full bg-gradient-to-br from-brand-500 to-brand-600 flex items-center justify-center mx-auto mb-6 text-white font-display font-bold text-xl shadow-soft">
+                        1
+                    </div>
+                    <h3 class="font-display font-semibold text-lg text-neutral-900 mb-3">数据准备</h3>
+                    <p class="text-neutral-600 text-sm leading-relaxed">收集样本图片，放置到 datasets/data/images 目录</p>
+                </div>
+
+                <!-- Step 2 -->
+                <div class="text-center">
+                    <div class="w-16 h-16 rounded-full bg-gradient-to-br from-brand-500 to-brand-600 flex items-center justify-center mx-auto mb-6 text-white font-display font-bold text-xl shadow-soft">
+                        2
+                    </div>
+                    <h3 class="font-display font-semibold text-lg text-neutral-900 mb-3">数据标注</h3>
+                    <p class="text-neutral-600 text-sm leading-relaxed">使用 LabelImg 进行水印位置标注，导出 YOLO 格式</p>
+                </div>
+
+                <!-- Step 3 -->
+                <div class="text-center">
+                    <div class="w-16 h-16 rounded-full bg-gradient-to-br from-brand-500 to-brand-600 flex items-center justify-center mx-auto mb-6 text-white font-display font-bold text-xl shadow-soft">
+                        3
+                    </div>
+                    <h3 class="font-display font-semibold text-lg text-neutral-900 mb-3">数据处理</h3>
+                    <p class="text-neutral-600 text-sm leading-relaxed">运行 Process.py 将数据集拆分为训练、测试、验证集</p>
+                </div>
+
+                <!-- Step 4 -->
+                <div class="text-center">
+                    <div class="w-16 h-16 rounded-full bg-gradient-to-br from-brand-500 to-brand-600 flex items-center justify-center mx-auto mb-6 text-white font-display font-bold text-xl shadow-soft">
+                        4
+                    </div>
+                    <h3 class="font-display font-semibold text-lg text-neutral-900 mb-3">模型训练</h3>
+                    <p class="text-neutral-600 text-sm leading-relaxed">执行 train.py 训练模型，test.py 进行推理验证</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Environment Setup -->
+    <section id="environment" class="py-20 px-6">
+        <div class="max-w-6xl mx-auto">
+            <div class="text-center mb-16">
+                <h2 class="font-display font-bold text-3xl md:text-4xl text-neutral-900 mb-4">环境配置</h2>
+                <p class="text-neutral-600 text-lg max-w-2xl mx-auto">快速搭建开发环境，支持多种部署方式</p>
+            </div>
+
+            <div class="grid md:grid-cols-2 gap-8">
+                <!-- Dev Containers -->
+                <div class="glass-effect rounded-2xl p-8 card-hover border border-neutral-200">
+                    <div class="flex items-center space-x-3 mb-6">
+                        <div class="w-12 h-12 rounded-lg bg-gradient-to-br from-brand-500 to-brand-600 flex items-center justify-center">
+                            <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 9l3 3-3 3m5 0h3M5 20h14a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                            </svg>
+                        </div>
+                        <h3 class="font-display font-semibold text-xl text-neutral-900">Dev Containers 【推荐】</h3>
+                    </div>
+                    <p class="text-neutral-600 mb-6 leading-relaxed">使用 VSCode 的 Dev Containers 模式，参考 .devcontainer/README.md 进行配置</p>
+                    <div class="code-block p-4 font-mono text-sm text-neutral-800 overflow-x-auto">
+                        <code class="text-white">cp .devcontainer/docker-compose-demo.yml .devcontainer/docker-compose.yml</code>
+                    </div>
+                    <p class="text-neutral-500 text-sm mt-4">主要关注 /root/.cache 路径映射、代理 PROXY 配置</p>
+                </div>
+
+                <!-- Virtual Environment -->
+                <div class="glass-effect rounded-2xl p-8 card-hover border border-neutral-200">
+                    <div class="flex items-center space-x-3 mb-6">
+                        <div class="w-12 h-12 rounded-lg bg-gradient-to-br from-brand-500 to-brand-600 flex items-center justify-center">
+                            <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/>
+                            </svg>
+                        </div>
+                        <h3 class="font-display font-semibold text-xl text-neutral-900">虚拟环境【可选】</h3>
+                    </div>
+                    <div class="space-y-4">
+                        <div>
+                            <p class="text-neutral-700 font-medium mb-2">【二选一】安装 torch-cpu 版：</p>
+                            <div class="code-block p-4 font-mono text-sm text-neutral-800 overflow-x-auto">
+                                <code class="text-white">pip install torch torchvision</code>
+                            </div>
+                        </div>
+                        <div>
+                            <p class="text-neutral-700 font-medium mb-2">【二选一】安装 torch-cuda 版：</p>
+                            <div class="code-block p-4 font-mono text-sm text-neutral-800 overflow-x-auto">
+                                <code class="text-white">pip install torch torchvision --index-url https://download.pytorch.org/whl/cu118</code>
+                            </div>
+                        </div>
+                        <div>
+                            <p class="text-neutral-700 font-medium mb-2">【必要】安装依赖：</p>
+                            <div class="code-block p-4 font-mono text-sm text-neutral-800 overflow-x-auto">
+                                <code class="text-white">pip install -r requirements.txt</code>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Dependency Versions -->
+            <div class="mt-12 glass-effect rounded-2xl p-8 border border-neutral-200">
+                <h3 class="font-display font-semibold text-xl text-neutral-900 mb-6">关键依赖版本</h3>
+                <div class="code-block p-6 font-mono text-sm text-neutral-800 overflow-x-auto">
+                    <pre class="text-neutral-700"><span class="text-white">python</span>==3.8.18
+<span class="text-white">torch</span>==2.3.0+cu118
+<span class="text-white">torchvision</span>==0.18.0+cu118
+<span class="text-white">ultralytics</span>==8.2.28
+<span class="text-white">labelImg</span>==1.8.6</pre>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Training & Inference -->
+    <section id="training" class="py-20 px-6 bg-white/50">
+        <div class="max-w-6xl mx-auto">
+            <div class="text-center mb-16">
+                <h2 class="font-display font-bold text-3xl md:text-4xl text-neutral-900 mb-4">训练与推理</h2>
+                <p class="text-neutral-600 text-lg max-w-2xl mx-auto">简单的命令即可完成模型训练和推理验证</p>
+            </div>
+
+            <div class="grid md:grid-cols-2 gap-8">
+                <!-- Training -->
+                <div class="glass-effect rounded-2xl p-8 card-hover border border-neutral-200">
+                    <div class="flex items-center space-x-3 mb-6">
+                        <div class="w-12 h-12 rounded-lg bg-gradient-to-br from-brand-500 to-brand-600 flex items-center justify-center">
+                            <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+                            </svg>
+                        </div>
+                        <h3 class="font-display font-semibold text-xl text-neutral-900">模型训练</h3>
+                    </div>
+                    <div class="code-block p-6 font-mono text-sm text-neutral-800">
+                        <code class="text-white">python train.py</code>
+                    </div>
+                    <p class="text-neutral-600 mt-4 leading-relaxed">执行训练脚本，开始对标注数据进行模型训练</p>
+                </div>
+
+                <!-- Inference -->
+                <div class="glass-effect rounded-2xl p-8 card-hover border border-neutral-200">
+                    <div class="flex items-center space-x-3 mb-6">
+                        <div class="w-12 h-12 rounded-lg bg-gradient-to-br from-brand-500 to-brand-600 flex items-center justify-center">
+                            <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+                            </svg>
+                        </div>
+                        <h3 class="font-display font-semibold text-xl text-neutral-900">模型推理</h3>
+                    </div>
+                    <div class="code-block p-6 font-mono text-sm text-neutral-800">
+                        <code class="text-white">python test.py</code>
+                    </div>
+                    <p class="text-neutral-600 mt-4 leading-relaxed">对测试图片进行水印检测，输出预测结果</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Custom Dataset -->
+    <section class="py-20 px-6">
+        <div class="max-w-6xl mx-auto">
+            <div class="text-center mb-16">
+                <h2 class="font-display font-bold text-3xl md:text-4xl text-neutral-900 mb-4">自定义数据集训练</h2>
+                <p class="text-neutral-600 text-lg max-w-2xl mx-auto">使用自己的数据进行模型训练，满足特定需求</p>
+            </div>
+
+            <div class="space-y-6">
+                <!-- Step 1 -->
+                <div class="glass-effect rounded-2xl p-6 border border-neutral-200 card-hover">
+                    <div class="flex items-start space-x-4">
+                        <div class="w-10 h-10 rounded-full bg-gradient-to-br from-brand-500 to-brand-600 flex items-center justify-center flex-shrink-0">
+                            <span class="text-white font-display font-bold">1</span>
+                        </div>
+                        <div class="flex-1">
+                            <h3 class="font-display font-semibold text-lg text-neutral-900 mb-3">安装 labelImg</h3>
+                            <div class="code-block p-4 font-mono text-sm text-neutral-800 overflow-x-auto">
+                                <code class="text-white">pip install labelImg</code>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Step 2 -->
+                <div class="glass-effect rounded-2xl p-6 border border-neutral-200 card-hover">
+                    <div class="flex items-start space-x-4">
+                        <div class="w-10 h-10 rounded-full bg-gradient-to-br from-brand-500 to-brand-600 flex items-center justify-center flex-shrink-0">
+                            <span class="text-white font-display font-bold">2</span>
+                        </div>
+                        <div class="flex-1">
+                            <h3 class="font-display font-semibold text-lg text-neutral-900 mb-3">启动 labelImg</h3>
+                            <div class="code-block p-4 font-mono text-sm text-neutral-800 overflow-x-auto">
+                                <code class="text-white">labelImg</code>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Step 3 -->
+                <div class="glass-effect rounded-2xl p-6 border border-neutral-200 card-hover">
+                    <div class="flex items-start space-x-4">
+                        <div class="w-10 h-10 rounded-full bg-gradient-to-br from-brand-500 to-brand-600 flex items-center justify-center flex-shrink-0">
+                            <span class="text-white font-display font-bold">3</span>
+                        </div>
+                        <div class="flex-1">
+                            <h3 class="font-display font-semibold text-lg text-neutral-900 mb-3">准备数据</h3>
+                            <ul class="text-neutral-600 space-y-2 leading-relaxed">
+                                <li>• 清理或备份旧的数据集</li>
+                                <li>• 将新数据图集放到 <code class="text-white bg-neutral-100 px-2 py-1 rounded">datasets/data/images</code> 目录</li>
+                                <li>• 图片宽高最好一致</li>
+                                <li>• 在 <code class="text-white bg-neutral-100 px-2 py-1 rounded">train.py</code> 中配置 <code class="text-white bg-neutral-100 px-2 py-1 rounded">imgsz</code> 图片宽高信息</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Step 4 -->
+                <div class="glass-effect rounded-2xl p-6 border border-neutral-200 card-hover">
+                    <div class="flex items-start space-x-4">
+                        <div class="w-10 h-10 rounded-full bg-gradient-to-br from-brand-500 to-brand-600 flex items-center justify-center flex-shrink-0">
+                            <span class="text-white font-display font-bold">4</span>
+                        </div>
+                        <div class="flex-1">
+                            <h3 class="font-display font-semibold text-lg text-neutral-900 mb-3">数据标注</h3>
+                            <ul class="text-neutral-600 space-y-2 leading-relaxed">
+                                <li>• 在 labelImg 中打开 <code class="text-white bg-neutral-100 px-2 py-1 rounded">datasets/data/images</code> 图集</li>
+                                <li>• 保存格式选择 <code class="text-white bg-neutral-100 px-2 py-1 rounded">YOLO</code></li>
+                                <li>• 建议点击 <code class="text-white bg-neutral-100 px-2 py-1 rounded">File -> YOLO</code> 保存全局默认格式</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Step 5 -->
+                <div class="glass-effect rounded-2xl p-6 border border-neutral-200 card-hover">
+                    <div class="flex items-start space-x-4">
+                        <div class="w-10 h-10 rounded-full bg-gradient-to-br from-brand-500 to-brand-600 flex items-center justify-center flex-shrink-0">
+                            <span class="text-white font-display font-bold">5</span>
+                        </div>
+                        <div class="flex-1">
+                            <h3 class="font-display font-semibold text-lg text-neutral-900 mb-3">数据集拆分</h3>
+                            <div class="code-block p-4 font-mono text-sm text-neutral-800 overflow-x-auto">
+                                <code class="text-white">cd datasets && python Process.py</code>
+                            </div>
+                            <p class="text-neutral-600 mt-3 leading-relaxed">将 images 目录拆分为 train、test、val 目录</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Step 6 -->
+                <div class="glass-effect rounded-2xl p-6 border border-neutral-200 card-hover">
+                    <div class="flex items-start space-x-4">
+                        <div class="w-10 h-10 rounded-full bg-gradient-to-br from-brand-500 to-brand-600 flex items-center justify-center flex-shrink-0">
+                            <span class="text-white font-display font-bold">6</span>
+                        </div>
+                        <div class="flex-1">
+                            <h3 class="font-display font-semibold text-lg text-neutral-900 mb-3">执行训练</h3>
+                            <ul class="text-neutral-600 space-y-2 leading-relaxed">
+                                <li>• 执行 <code class="text-white bg-neutral-100 px-2 py-1 rounded">python train.py</code> 进行训练</li>
+                                <li>• 执行 <code class="text-white bg-neutral-100 px-2 py-1 rounded">python test.py</code> 进行推理</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- FAQ Section -->
+    <section id="faq" class="py-20 px-6 bg-white/50">
+        <div class="max-w-6xl mx-auto">
+            <div class="text-center mb-16">
+                <h2 class="font-display font-bold text-3xl md:text-4xl text-neutral-900 mb-4">常见问题</h2>
+                <p class="text-neutral-600 text-lg max-w-2xl mx-auto">关于项目使用和配置的常见疑问</p>
+            </div>
+
+            <div class="space-y-4 max-w-3xl mx-auto">
+                <!-- FAQ 1 -->
+                <details class="glass-effect rounded-xl border border-neutral-200 overflow-hidden group">
+                    <summary class="px-6 py-4 cursor-pointer font-display font-medium text-neutral-900 flex items-center justify-between hover:bg-neutral-50 transition-colors">
+                        <span>如何提高检测准确率？</span>
+                        <svg class="w-5 h-5 text-neutral-500 group-open:rotate-180 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                        </svg>
+                    </summary>
+                    <div class="details-animation px-6 pb-4">
+                        <p class="text-neutral-600 leading-relaxed">增加训练样本数量、提高标注质量、调整模型参数（如 imgsz、epochs等）可以有效提高检测准确率。建议至少使用 100 张以上标注图片进行训练。</p>
+                    </div>
+                </details>
+
+                <!-- FAQ 2 -->
+                <details class="glass-effect rounded-xl border border-neutral-200 overflow-hidden group">
+                    <summary class="px-6 py-4 cursor-pointer font-display font-medium text-neutral-900 flex items-center justify-between hover:bg-neutral-50 transition-colors">
+                        <span>支持 GPU 加速吗？</span>
+                        <svg class="w-5 h-5 text-neutral-500 group-open:rotate-180 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                        </svg>
+                    </summary>
+                    <div class="details-animation px-6 pb-4">
+                        <p class="text-neutral-600 leading-relaxed">支持。安装 CUDA 版本的 torch 可以启用 GPU 加速，大幅提升训练和推理速度。参考环境配置中的 torch-cuda 版安装步骤。</p>
+                    </div>
+                </details>
+
+                <!-- FAQ 3 -->
+                <details class="glass-effect rounded-xl border border-neutral-200 overflow-hidden group">
+                    <summary class="px-6 py-4 cursor-pointer font-display font-medium text-neutral-900 flex items-center justify-between hover:bg-neutral-50 transition-colors">
+                        <span>如何自动移除检测到的水印？</span>
+                        <svg class="w-5 h-5 text-neutral-500 group-open:rotate-180 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                        </svg>
+                    </summary>
+                    <div class="details-animation px-6 pb-4">
+                        <p class="text-neutral-600 leading-relaxed">可以结合 IOPaint 工具实现自动水印移除。具体使用方法请参考 <a href="https://github.com/Samge0/yolo8-plus-iopaint" target="_blank" class="text-white hover:underline">yolo8-plus-iopaint</a> 仓库。</p>
+                    </div>
+                </details>
+
+                <!-- FAQ 4 -->
+                <details class="glass-effect rounded-xl border border-neutral-200 overflow-hidden group">
+                    <summary class="px-6 py-4 cursor-pointer font-display font-medium text-neutral-900 flex items-center justify-between hover:bg-neutral-50 transition-colors">
+                        <span>训练时出现内存不足错误怎么办？</span>
+                        <svg class="w-5 h-5 text-neutral-500 group-open:rotate-180 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                        </svg>
+                    </summary>
+                    <div class="details-animation px-6 pb-4">
+                        <p class="text-neutral-600 leading-relaxed">可以减小 batch size、降低图片分辨率（imgsz）、减少数据集规模。如果使用 CPU 训练，建议使用较小的模型配置。</p>
+                    </div>
+                </details>
+
+                <!-- FAQ 5 -->
+                <details class="glass-effect rounded-xl border border-neutral-200 overflow-hidden group">
+                    <summary class="px-6 py-4 cursor-pointer font-display font-medium text-neutral-900 flex items-center justify-between hover:bg-neutral-50 transition-colors">
+                        <span>可以使用自己的图片数据吗？</span>
+                        <svg class="w-5 h-5 text-neutral-500 group-open:rotate-180 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                        </svg>
+                    </summary>
+                    <div class="details-animation px-6 pb-4">
+                        <p class="text-neutral-600 leading-relaxed">可以。参考"自定义数据集训练"部分，将您的图片放到指定目录，使用 labelImg 进行标注，然后按照标准流程进行训练即可。</p>
+                    </div>
+                </details>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="py-12 px-6 border-t border-neutral-200">
+        <div class="max-w-6xl mx-auto">
+            <div class="flex flex-col md:flex-row items-center justify-between">
+                <div class="flex items-center space-x-3 mb-6 md:mb-0">
+                    <img src="icon.png" alt="Watermark Detection" class="w-8 h-8">
+                    <span class="font-display font-semibold text-neutral-900">水印检测 Demo</span>
+                </div>
+                
+                <div class="flex items-center space-x-6">
+                    <a href="https://github.com/Samge0/yolo8-watermark-xhs" target="_blank" class="text-neutral-600 hover:text-brand-500 transition-colors flex items-center space-x-2">
+                        <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
+                        </svg>
+                        <span class="text-sm">GitHub</span>
+                    </a>
+                    
+                    <div class="text-neutral-500 text-sm">
+                        MIT License
+                    </div>
+                </div>
+            </div>
+            
+            <div class="mt-8 pt-8 border-t border-neutral-200 text-center">
+                <p class="text-neutral-500 text-sm">
+                    基于 YOLOv8 与 LabelImg 构建 | 用于小红书 Logo 水印检测研究
+                </p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Smooth scroll for navigation links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            });
+        });
+
+        // Add scroll-based nav background
+        window.addEventListener('scroll', () => {
+            const nav = document.querySelector('nav');
+            if (window.scrollY > 50) {
+                nav.classList.add('shadow-soft');
+            } else {
+                nav.classList.remove('shadow-soft');
+            }
+        });
+    </script>
+</body>
+</html>
